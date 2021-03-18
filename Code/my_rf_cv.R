@@ -10,7 +10,9 @@
 #' @importFrom randomForest randomForest
 #' @importFrom tidyr drop_na
 #' @importFrom dplyr filter
-#'
+#' 
+#' @keywords prediction
+#' 
 #' @export
 my_rf_cv <- function(k) {
   penguins <- mypackage::my_penguins

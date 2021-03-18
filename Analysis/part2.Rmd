@@ -16,12 +16,13 @@ This is an R Markdown document. Markdown is a simple formatting syntax for autho
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
 ```{r cars}
-summary(cars)
+# load libaries 
 library(tidyverse)
 library(gapminder)
 library(mypackage)
-source("../code/my_rf_cv.R")
 library(randomForest)
+# source the function
+source("../code/my_rf_cv.R")
 data(gapminder)
 write_csv(gapminder, "../Data/gapminder.csv")
 gapminder <- read_csv("../Data/gapminder.csv")
@@ -30,45 +31,54 @@ penguins <- read_csv("../Data/penguins.csv")
 
 
 ```{r}
+# Create empty lists to store MSE for each k value
 MSE_k2 <- rep(NA, 30)
+MSE_k5 <- rep(NA, 30)
+MSE_k10 <- rep(NA, 30)
+
+# iterates eacch k value 30 times
 for (i in 1:30) {
   MSE_k2[i] <-  my_rf_cv(2) 
 }
 
-MSE_k5 <- rep(NA, 30)
 for (i in 1:30) {
   MSE_k5[i] <-  my_rf_cv(5) 
 }
 
-MSE_k10 <- rep(NA, 30)
 for (i in 1:30) {
   MSE_k10[i] <-  my_rf_cv(10) 
 }
 
-
-MSE <- append(MSE_k2, MSE_k5)
-MSE <- append(MSE, MSE_k10)
+# append each list together 
+cv_list <- append(MSE_k2, MSE_k5)
+cv_list <- append(cv_list, MSE_k10)
+# create a list of k values
 k_val <- c(rep(2, 30), rep(5, 30), rep(10, 30))
 
-
-stimnulation <- as.data.frame(cbind(MSE, k_val))
-
-simulation_figure <- ggplot(data = stimnulation, 
-       aes(x = as.factor(k_val), y = as.numeric(MSE))) +
-  geom_boxplot() +
-  labs(x = "K", y = " CV estimated MSE", title = "K value vs CV estimated MSE")
-
-ggsave("simulation_figure", simulation_figure, pdf, "../Output/Figures")
-
+# create a dataframe
 simulation_csv <- data.frame("k_as_2" = MSE_k2,
-           "k_as_5" = MSE_k5,
-           "k_as_10" = MSE_k10)
-sum_stat <- data.frame("k" = c(2, 5, 10),
+                             "k_as_5" = MSE_k5,
+                             "k_as_10" = MSE_k10)
+
+# Create a data frame to graph the boxplot
+df_rf_cv <- as.data.frame(cbind(cv_list, k_val))
+simulation_figure <- ggplot(data = df_rf_cv, 
+                     aes(x = as.factor(k_val), y = as.numeric(cv_list))) +
+                     geom_boxplot()
+
+# create summary table
+sum_table <- data.frame("k" = c(2, 5, 10),
                       "sd" = c(sd(MSE_k2), sd(MSE_k5), sd(MSE_k10)),
                       "mean" = c(mean(MSE_k2), mean(MSE_k5), mean(MSE_k10)))
+box_plot
+sum_table
 
-saveRDS(sum_stat, "../Output/Results/sum_stat.rds")
+# save the simulation figure into a pdf
+ggsave("simulation_figure", simulation_figure, pdf, "../Output/Figures")
+
+# Save the summary statistics to rds
+saveRDS(sum_table, "../Output/Results/sum_stat.rds")
+# Wrtie the simulation to a csv file 
 write_csv(simulation_csv, "../Output/Results/simulation.csv")
 ```
-
 
