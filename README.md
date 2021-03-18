@@ -1,1 +1,0 @@
-# STAT302Proj3pt2
